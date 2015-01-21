@@ -449,7 +449,7 @@ int main(int argc, char **argv)
   
   unsigned int scan_code, prev_code = 0;  // the key code of the pressed key (some codes are from "scan code set 1", some are different (see <linux/input.h>)
   struct input_event event;
-  char timestamp[32];  // timestamp string, long enough to hold format "\n%F %T%z > "
+  char timestamp[1024];  // timestamp string, long enough to hold format "\n%F %T%z > "
   bool shift_in_effect = false;
   bool altgr_in_effect = false;
   bool ctrl_in_effect = false;  // used for identifying Ctrl+C / Ctrl+D
@@ -463,7 +463,10 @@ int main(int argc, char **argv)
   time_t cur_time;
   time(&cur_time);
 #define TIME_FORMAT "%F %T%z > "  // results in YYYY-mm-dd HH:MM:SS+ZZZZ
-  strftime(timestamp, sizeof(timestamp), TIME_FORMAT, localtime(&cur_time));
+  if (args.timestamp_format.empty()) {
+      args.timestamp_format = TIME_FORMAT;
+  }
+  strftime(timestamp, sizeof(timestamp), args.timestamp_format.c_str(), localtime(&cur_time));
   
   if (args.flags & FLAG_NO_TIMESTAMPS)
     file_size += fprintf(out, "Logging started at %s\n\n", timestamp);
@@ -513,7 +516,7 @@ int main(int argc, char **argv)
       
       // write new timestamp
       time(&cur_time);
-      strftime(timestamp, sizeof(timestamp), TIME_FORMAT, localtime(&cur_time));
+      strftime(timestamp, sizeof(timestamp), args.timestamp_format.c_str(), localtime(&cur_time));
       if (args.flags & FLAG_NO_TIMESTAMPS)
         file_size += fprintf(out, "Logging started at %s\n\n", timestamp);
       else
@@ -555,8 +558,9 @@ int main(int argc, char **argv)
         if (args.flags & FLAG_NO_TIMESTAMPS)
           inc_size += fprintf(out, "\n");
         else {
-          strftime(timestamp, sizeof(timestamp), "\n" TIME_FORMAT, localtime(&event.time.tv_sec));
-          inc_size += fprintf(out, "%s", timestamp);  // then newline and timestamp
+          strftime(timestamp, sizeof(timestamp), args.timestamp_format.c_str(), localtime(&event.time.tv_sec));
+
+          inc_size += fprintf(out, "\n%s", timestamp);  // then newline and timestamp
         }
         if (inc_size > 0) file_size += inc_size;
         if (!args.onebyone) continue;  // but don't log "<Enter>"

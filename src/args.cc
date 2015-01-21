@@ -26,6 +26,7 @@ struct arguments
   std::string irc_entity;   // if --post-irc effective, this holds the IRC entity to PRIVMSG (either #channel or NickName)
   std::string irc_server;   // if --post-irc effective, this holds the IRC hostname
   std::string irc_port;     // if --post-irc effective, this holds the IRC port number
+  std::string timestamp_format; // user-specified timestamp format
   off_t post_size;     // post log file to remote when of size post_size, --post-size switch
   int flags;           // holds the following option flags
 #define FLAG_EXPORT_KEYMAP    0x1  // export keymap obtained from dumpkeys, --export-keymap is used
@@ -34,6 +35,7 @@ struct arguments
 #define FLAG_POST_HTTP        0x8  // post log to remote HTTP server, --post-http switch
 #define FLAG_POST_IRC        0x10  // post log to remote IRC server, --post-irc switch
 #define FLAG_POST_SIZE       0x20  // post log to remote HTTP or IRC server when log of size optarg, --post-size
+#define FLAG_TIMESTAMP_FORMAT 0x40 // use user-defined timestamp format, --timestamp-format switch
 } args = {0};  // default all args to 0x0 or ""
 
 
@@ -56,13 +58,14 @@ void process_command_line_arguments(int argc, char **argv)
     {"post-http",     required_argument, &flags, FLAG_POST_HTTP},
     {"post-irc",      required_argument, &flags, FLAG_POST_IRC},
     {"post-size",     required_argument, &flags, FLAG_POST_SIZE},
+    {"timestamp-format", required_argument, &flags, FLAG_TIMESTAMP_FORMAT},
     {0}
   };
   
   char c;
   int option_index;
   
-  while ((c = getopt_long(argc, argv, "sm:o:ukd:1?", long_options, &option_index)) != -1)
+  while ((c = getopt_long(argc, argv, "sm:o:ukd:1f:?", long_options, &option_index)) != -1)
   {
     switch (c) 
     {
@@ -73,6 +76,7 @@ void process_command_line_arguments(int argc, char **argv)
       case 'k': args.kill = true;      break;
       case 'd': args.device = optarg;  break;
       case '1': args.onebyone = true;  break;
+      case 'f': args.timestamp_format = optarg; break;
       
       case  0 : 
         args.flags |= flags;
@@ -107,6 +111,11 @@ void process_command_line_arguments(int argc, char **argv)
               case 'K': case 'k': args.post_size *= 1000;    break;
               case 'M': case 'm': args.post_size *= 1000000; break;
             }
+            break;
+
+          case FLAG_TIMESTAMP_FORMAT:
+            args.timestamp_format = optarg;
+            break;
         }
         break;
       
