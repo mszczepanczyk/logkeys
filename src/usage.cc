@@ -23,6 +23,7 @@ void usage()
 "  -u, --us-keymap           use en_US keymap instead of configured default\n"
 "  -k, --kill                kill running logkeys process\n"
 "  -d, --device=FILE         input event device [eventX from " INPUT_EVENT_PATH "]\n"
+"  -1, --onebyone            log each keypress in a new line\n"
 "  -?, --help                print this help screen\n"
 "      --export-keymap=FILE  export configured keymap to FILE and exit\n"
 "      --no-func-keys        log only character keys\n"

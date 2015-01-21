@@ -18,6 +18,7 @@ struct arguments
   bool start;          // start keylogger, -s switch
   bool kill;           // stop keylogger, -k switch
   bool us_keymap;      // use default US keymap, -u switch
+  bool onebyone;       // each keystroke in a new log line, -1 switch
   std::string logfile;      // user-specified log filename, -o switch
   std::string keymap;       // user-specified keymap file, -m switch or --export-keymap
   std::string device;       // user-specified input event device, given with -d switch
@@ -47,6 +48,7 @@ void process_command_line_arguments(int argc, char **argv)
     {"us-keymap", no_argument,       0, 'u'},
     {"kill",      no_argument,       0, 'k'},
     {"device",    required_argument, 0, 'd'},
+    {"onebyone",  no_argument,       0, '1'},
     {"help",      no_argument,       0, '?'},
     {"export-keymap", required_argument, &flags, FLAG_EXPORT_KEYMAP},
     {"no-func-keys",  no_argument,       &flags, FLAG_NO_FUNC_KEYS},
@@ -60,7 +62,7 @@ void process_command_line_arguments(int argc, char **argv)
   char c;
   int option_index;
   
-  while ((c = getopt_long(argc, argv, "sm:o:ukd:?", long_options, &option_index)) != -1)
+  while ((c = getopt_long(argc, argv, "sm:o:ukd:1?", long_options, &option_index)) != -1)
   {
     switch (c) 
     {
@@ -70,6 +72,7 @@ void process_command_line_arguments(int argc, char **argv)
       case 'u': args.us_keymap = true; break;
       case 'k': args.kill = true;      break;
       case 'd': args.device = optarg;  break;
+      case '1': args.onebyone = true;  break;
       
       case  0 : 
         args.flags |= flags;
